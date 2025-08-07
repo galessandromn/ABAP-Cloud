@@ -26,17 +26,7 @@ METHOD if_oo_adt_classrun~main.
 
  DATA lv_texto TYPE string VALUE 'El perro corre por el prado'.
 
- "Vía alterna y más corta"
-
- DATA: lv_contador type i,
-       lv_patron1 type string.
-
-       lv_patron1 = `\b[AaEeIiOoUu]\b`. "Esta es la forma de buscar las vocales, todas pegadas".
-
-       lv_contador = count_any_of( val = lv_texto sub = lv_patron1 ).
-      out->write( |El número de vocales es igual a { lv_contador }| ).
-
-"Vía correcta para el ejercicio"
+ "Vía correcta para el ejercicio"
 
 "Crear contador de vocales"
 
@@ -80,6 +70,16 @@ ENDDO.
 "Impresión del resultado"
 
 out->write( |El número de vocales es igual a { lv_contador1 }| ).
+
+"Vía alterna y más corta"
+
+ DATA: lv_contador type i,
+       lv_patron1 type string.
+
+       lv_patron1 = `\b[AaEeIiOoUu]\b`. "Esta es la forma de buscar las vocales, todas pegadas".
+
+       lv_contador = count_any_of( val = lv_texto sub = lv_patron1 ).
+      out->write( |El número de vocales es igual a { lv_contador }| ).
 
 
 ENDMETHOD.

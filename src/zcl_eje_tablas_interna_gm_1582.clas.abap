@@ -230,6 +230,19 @@ CLASS zcl_eje_tablas_interna_gm_1582 IMPLEMENTATION.
     LOOP AT lt_aeropuertos INTO ls_aeropuerto WHERE country = 'DE'.
       APPEND ls_aeropuerto TO lt_alemanes.
     ENDLOOP.
+    out->write( data = lt_alemanes name = 'Versión WHERE' ).
+    out->write( |\n| ).
+
+
+
+*    LOOP AT lt_aeropuertos INTO ls_aeropuerto.
+*
+*      IF
+*      ls_aeropuerto-country = 'DE'.
+*        APPEND ls_aeropuerto TO lt_alemanes.
+*      ENDIF.
+*    ENDLOOP.
+*    out->write( data = lt_alemanes name = 'Versión IF').
 
     "MANERA ALTERNATIVA"
 
@@ -240,28 +253,28 @@ CLASS zcl_eje_tablas_interna_gm_1582 IMPLEMENTATION.
 *    ENDLOOP.
 
     "PASO 2.4 - Acceder al aeropuerto con ID = 'MUC' y mostrar la ciudad
-    READ TABLE lt_aeropuertos INTO ls_aeropuerto WITH KEY airport_id = 'MUC'.
-    IF sy-subrc = 0. "Puede ser 0 (afirmativo) o 4 (negativo). Simplemente se usa para saber si la tabla tiene datos"
-      out->write( |\n| ).
-      out->write( |RESULTADO DE LA BÚSQUEDA| ).
-      out->write( |Ciudad del aeropuerto: { ls_aeropuerto-city }| ).
-    ENDIF.
-
-
-
-    "PASO 3.1 - Declaración de una variable"
-
-    DATA(lv_texto) = 'El pasajero Pedro con email pedro@viajes.com ha comprado el billete'.
-
-    "PASO 3.2 - Extracción del nombre"
-
-    DATA(lv_texto_aux1) = substring_before( val = lv_texto sub = ' con' ).
-    DATA(lv_texto_aux2) = substring_after(  val = lv_texto_aux1 sub = 'pasajero' ).
-    out->write( lv_texto_aux2 ).
-
-    "DATA(lv_texto2) = substring( val = lv_texto off = 0 len = lv_pos1
-
-"PASO 3.3 - Extracción del correo electrónico"
+*    READ TABLE lt_aeropuertos INTO ls_aeropuerto WITH KEY airport_id = 'MUC'.
+*    IF sy-subrc = 0. "Puede ser 0 (afirmativo) o 4 (negativo). Simplemente se usa para saber si la tabla tiene datos"
+*      out->write( |\n| ).
+*      out->write( |RESULTADO DE LA BÚSQUEDA| ).
+*      out->write( |Ciudad del aeropuerto: { ls_aeropuerto-city }| ).
+*    ENDIF.
+*
+*
+*
+*    "PASO 3.1 - Declaración de una variable"
+*
+*    DATA(lv_texto) = 'El pasajero Pedro con email pedro@viajes.com ha comprado el billete'.
+*
+*    "PASO 3.2 - Extracción del nombre"
+*
+*    DATA(lv_texto_aux1) = substring_before( val = lv_texto sub = ' con' ).
+*    DATA(lv_texto_aux2) = substring_after(  val = lv_texto_aux1 sub = 'pasajero' ).
+*    out->write( lv_texto_aux2 ).
+*
+*    "DATA(lv_texto2) = substring( val = lv_texto off = 0 len = lv_pos1
+*
+*    "PASO 3.3 - Extracción del correo electrónico"
 
 *El correo electrónico usando expresión regular (\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b) y la función match.
 
