@@ -417,8 +417,240 @@ CLASS zcl_tablas_gm_1582 IMPLEMENTATION.
     out->write( |\n| ).
     out->write( lv_index2 ).
 
+    "lines --> Cuenta el número total de líneas en la tabla"
+    out->write( |\n| ).
+    DATA(lv_num) = lines( lt_flights ).
+    out->write( data = lv_num name = 'lv_num' ).
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    "Loop at"
+
+    TYPES: BEGIN OF ty_persona,
+             nombre TYPE string,
+             edad   TYPE i,
+           END OF ty_persona.
+
+    TYPES: ty_tabla_personas TYPE STANDARD TABLE OF ty_persona WITH EMPTY KEY.
 
 
+    DATA(lt_persona) = VALUE ty_tabla_personas(
+    ( nombre = 'Ana' edad = 25 )
+    ( nombre = 'Javier' edad = 45 )
+    ( nombre = 'Lucia' edad = 22 )
+
+
+
+    ).
+
+    out->write( lt_persona ).
+
+    DATA ls_persona TYPE ty_persona.
+
+    LOOP AT lt_persona INTO ls_persona WHERE nombre = 'Ana' .
+
+      out->write( |Nombre: { ls_persona-nombre }, Edad: { ls_persona-edad }| ).
+
+    ENDLOOP.
+
+    "loop con assigning field-symbol
+
+
+    SELECT FROM /dmo/flight
+      FIELDS *
+      WHERE carrier_id = 'LH'
+      INTO TABLE @DATA(lt_flights3).
+
+    DATA ls_flight TYPE /dmo/flight.
+
+    "loop "normal"
+
+    LOOP AT lt_flights3 INTO ls_flight.
+
+      out->write( data = ls_flight name = `ls_flight` ).
+    ENDLOOP.
+
+
+    """"""""""""""""""""""""""""""
+
+    "loop con where y field-symbol
+    LOOP AT lt_flights3 ASSIGNING FIELD-SYMBOL(<fs_flight>) WHERE connection_id = '0403'.
+
+      "out->write( data = <fs_flight> name = `<fs_flight>` ).
+    ENDLOOP.
+    out->write( |\n| ).
+    out->write( |\n| ).
+
+
+    "loop con where y estructura creada en linea para almacenar valores
+    LOOP AT lt_flights3 INTO DATA(ls_flight2) WHERE connection_id = '0403'.
+
+      out->write( data = ls_flight2 name = `fs_flight2` ).
+
+    ENDLOOP.
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    SELECT FROM /dmo/flight
+    FIELDS *
+    WHERE carrier_id = 'LH'
+    INTO TABLE @DATA(lt_flights4).
+
+    DATA ls_flight4 TYPE /dmo/flight.
+
+    LOOP AT lt_flights4 ASSIGNING FIELD-SYMBOL(<fs_flight2>) FROM 3 TO 8.
+
+      <fs_flight2>-currency_code = 'COP'.
+    ENDLOOP.
+    out->write( data = lt_flights name = `lt_flights4` ).
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    "FOR --> Condición heredada de JAVA. Se puede combinar con otros condicionales. Es el comando ideal para anidar bucles."
+
+    TYPES: BEGIN OF ty_vuelos,
+             iduser     TYPE /dmo/customer_id,
+             aircode    TYPE /dmo/carrier_id,
+             flightnum  TYPE /dmo/connection_id,
+             key        TYPE land1,
+             seat       TYPE /dmo/plane_seats_occupied,
+             flightdate TYPE /dmo/flight_date,
+           END OF ty_vuelos.
+
+    DATA: gt_flights_info TYPE TABLE OF ty_vuelos, "Se declaran dos tablas"
+          gt_my_flights   TYPE TABLE OF ty_vuelos.
+
+*          gt_my_flights = VALUE #( for i = 1 until i > 30 "Donde 'i' es la variable creada. Por convención, se utiliza la i para esta declaración."
+*
+*(               iduser = | { 123456 + i } - USER |
+*                aircode = 'LH'
+*                flightnum = 00001 + i
+*                key = 'US'
+*                seat = 0 + i
+*                flightdate = cl_abap_context_info=>get_system_date(  ) + 1 ) ).
+*
+*out->write( data = gt_my_flights name = 'gt_my_flights' ).
+*
+*"FOR con el while
+*
+* gt_my_flights = VALUE #( for i = 1 while i <= 20
+*
+*(               iduser = | { 123456 + i } - USER |
+*                aircode = 'LH'
+*                flightnum = 00001 + i
+*                key = 'US'
+*                seat = 0 + i
+*                flightdate = cl_abap_context_info=>get_system_date(  ) + 1 ) ).
+*
+*out->write( data = gt_my_flights name = 'gt_my_flights' ).
+
+    gt_flights_info = VALUE #(  FOR ls_my_flight IN gt_my_flights
+            (       iduser = ls_my_flight-iduser
+                    aircode = ls_my_flight-aircode
+                    flightnum = ls_my_flight-flightnum
+                    key = ls_my_flight-key
+                    seat = ls_my_flight-seat
+                    flightdate = ls_my_flight-flightdate ) ).
+
+    out->write( data = gt_my_flights name = 'gt_my_flights' ).
+
+    gt_flights_info = VALUE #( FOR ls_my_flight IN gt_my_flights
+    WHERE ( aircode = 'LH' AND flightnum < 0012 )
+
+            (       iduser = ls_my_flight-iduser
+                    aircode = ls_my_flight-aircode
+                    flightnum = ls_my_flight-flightnum
+                    key = ls_my_flight-key
+                    seat = ls_my_flight-seat
+                    flightdate = ls_my_flight-flightdate ) ).
+
+    out->write( |\n| ).
+    out->write( data = gt_my_flights name = 'gt_my_flights' ).
+
+    "FOR ANIDADO"
+
+*    TYPES: BEGIN OF ty_vuelos2,
+*             aircode     TYPE /dmo/carrier_id,
+*             flightnum   TYPE /dmo/connection_id,
+*             flightdate  TYPE /dmo/flight_date,
+*             flightprice TYPE /dmo/flight_price,
+*             currency    TYPE /dmo/currency_code,
+*           END OF ty_vuelos2.
+*
+*
+*    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+*
+*    "TABLA SORTED --> Es un tipo de tabla, la cual se encuentra ordenada según determinado criterio."
+*
+*    TYPES: BEGIN OF ty_flights,
+*             aircode     TYPE /dmo/carrier_id,
+*             flightnum   TYPE /dmo/connection_id,
+*             flightdate  TYPE /dmo/flight_date,
+*             flightprice TYPE /dmo/flight_price,
+*             currency    TYPE /dmo/currency_code,
+*           END OF ty_flights.
+*
+*    "creamos primera tabla lt_flights_type, que extrae datos de la base de datos de /dmo/flight
+*    SELECT FROM /dmo/flight
+*         FIELDS *
+*         INTO TABLE @DATA(lt_flights_type).
+*
+*
+*    "creamos segunda tabla lt_airline, que extrae datos de la base de datos de /dmo/booking_m
+*    SELECT FROM /dmo/booking_m
+*       FIELDS carrier_id, connection_id , flight_price, currency_code
+*       INTO TABLE @DATA(lt_airline)
+*       UP TO 20 ROWS.
+*
+*    "creamos tercera tabla que es de tipo SORTED!!!! a diferencia de con las que hemos trabajado anteriormente que siempre eran estandar.
+*    "y le indicamos que herda los tipos de ty_flights y tiene una key no unica que hace referencia al campo/columna flightprice
+*    DATA lt_final TYPE SORTED TABLE OF ty_flights WITH NON-UNIQUE KEY flightprice.
+*
+*
+*    "continuamos con el proceso de creacion de la lt_final usando una expresion de value con for anidados
+*    lt_final = VALUE #(
+*
+*    "primer bucle for : recorre la tabla lt_flgiths_type
+*    "filtra solo los vuelos cuyo carrier_id sea 'AA'
+*     FOR ls_flight_type IN lt_flights_type WHERE ( carrier_id = 'AA' )
+*
+*
+*                          "segundo bucle for anidado:recorre la tabla lt_airline
+*                          "solo se selecciona los registros que coinciden en carrier_id con el vuelo actual
+*                         FOR ls_airline IN lt_airline WHERE (  carrier_id = ls_flight_type-carrier_id )
+*
+*                            "crea una estructura para cada combinacion valida de vuelo y aerolinia
+*                         ( aircode     = ls_flight_type-carrier_id
+*                           flightnum   = ls_flight_type-connection_id
+*                           flightdate  = ls_flight_type-flight_date
+*                           flightprice = ls_airline-flight_price
+*                           currency    = ls_airline-currency_code )  ).
+*
+*
+*
+*    out->write( data = lt_flights_type name = `lt_flights_type` ).
+*    out->write( |\n| ).
+*    out->write( data = lt_airline name = `lt_airline` ).
+*    out->write( |\n| ).
+*    out->write( data = lt_final name = `tabla generada con las dos anteriores lt_final ` ).
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    "SELECT"
+
+    SELECT FROM /dmo/flight  "FORMA CONVENCIONAL"
+    FIELDS *
+    WHERE carrier_id = 'LH'
+    INTO TABLE @DATA(lt_flights6).
+
+    "NOTA: NO usar el SELECT para filtrado de tablas internas. Solo para extraer datos de tablas de base de datos."
+
+    SELECT carrier_id, connection_id, flight_date
+    FROM @lt_flights6 AS gt
+    INTO TABLE @DATA(lt_flights_copy).
+    out->write( data = lt_flights6 name = 'lt_flights6' ).
+    out->write( |\n| ).
+    out->write( data = lt_flights_copy name = 'lt_flights_copy' ).
 
   ENDMETHOD.
 ENDCLASS.
